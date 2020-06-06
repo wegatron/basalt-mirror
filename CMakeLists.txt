@@ -22,10 +22,10 @@ endif(DPKG_PROGRAM)
 
 find_program(LSB_RELEASE_PROGRAM lsb_release DOC "lsb_release program of Debian-based systems")
 if(LSB_RELEASE_PROGRAM)
-  execute_process(COMMAND ${LSB_RELEASE_PROGRAM} -rs
-    OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
+  # execute_process(COMMAND ${LSB_RELEASE_PROGRAM} -rs
+  #   OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
+  #   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(LSB_RELEASE_ID_SHORT 18.04)
   if(${LSB_RELEASE_ID_SHORT} EQUAL "20.04")
     set(DEBIAN_DEPENDS "libtbb2, liblz4-1, libbz2-1.0, libboost-filesystem1.71.0, libboost-date-time1.71.0, libboost-program-options1.71.0, libboost-regex1.71.0, libopencv-dev, libglew2.1, libjpeg8, libpng16-16, librealsense2, librealsense2-dkms, librealsense2-gl, librealsense2-utils")
 
@@ -197,7 +197,6 @@ endif()
 
 # setup combined compiler flags
 set(CMAKE_CXX_FLAGS "${BASALT_CXX_FLAGS} -march=${CXX_MARCH} ${BASALT_PASSED_CXX_FLAGS}")
-
 
 set(EIGEN_INCLUDE_DIR_HINTS ${EIGEN_ROOT})
 find_package(Eigen3 3.3.7 EXACT REQUIRED MODULE)
