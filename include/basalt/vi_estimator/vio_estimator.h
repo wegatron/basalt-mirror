@@ -59,6 +59,10 @@ struct VioVisualizationData {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
+/**
+ * @brief The VioEstimatorBase class
+ * vio接口, 定义了vio数据队列, vio运行状态信息等
+ */
 class VioEstimatorBase {
  public:
   typedef std::shared_ptr<VioEstimatorBase> Ptr;

@@ -111,7 +111,7 @@ class FrameToFrameOpticalFlow : public OpticalFlowBase {
       if (!v.img.get()) return;
     }
 
-    if (t_ns < 0) {
+    if (t_ns < 0) { // first image
       t_ns = curr_t_ns;
 
       transforms.reset(new OpticalFlowResult);
@@ -203,15 +203,17 @@ class FrameToFrameOpticalFlow : public OpticalFlowBase {
       for (size_t r = range.begin(); r != range.end(); ++r) {
         const KeypointId id = ids[r];
 
+        // transform_1 : old_transform
+        // transform_2 : new_transform
         const Eigen::AffineCompact2f& transform_1 = init_vec[r];
         Eigen::AffineCompact2f transform_2 = transform_1;
 
-        bool valid = trackPoint(pyr_1, pyr_2, transform_1, transform_2);
+        bool valid = trackPoint(pyr_1, pyr_2, transform_1, transform_2); // 1 --> 2
 
         if (valid) {
           Eigen::AffineCompact2f transform_1_recovered = transform_2;
 
-          valid = trackPoint(pyr_2, pyr_1, transform_2, transform_1_recovered);
+          valid = trackPoint(pyr_2, pyr_1, transform_2, transform_1_recovered); // 2 --> 1
 
           if (valid) {
             Scalar dist2 = (transform_1.translation() -
@@ -243,6 +245,7 @@ class FrameToFrameOpticalFlow : public OpticalFlowBase {
 
     transform.linear().setIdentity();
 
+    // coarse to fine
     for (int level = config.optical_flow_levels; level >= 0 && patch_valid;
          level--) {
       const Scalar scale = 1 << level;
@@ -279,6 +282,7 @@ class FrameToFrameOpticalFlow : public OpticalFlowBase {
       bool valid = dp.residual(img_2, transformed_pat, res);
 
       if (valid) {
+        // the H_se2_inv_J_se2_T is precalculated in PatchT's constructor
         Vector3 inc = -dp.H_se2_inv_J_se2_T * res;
         transform *= SE2::exp(inc).matrix();
 
@@ -320,6 +324,7 @@ class FrameToFrameOpticalFlow : public OpticalFlowBase {
       last_keypoint_id++;
     }
 
+    // 双目相机, 使用光流计算特征点在右目相机中的位置
     if (calib.intrinsics.size() > 1) {
       trackPoints(pyramid->at(0), pyramid->at(1), new_poses0, new_poses1);
 

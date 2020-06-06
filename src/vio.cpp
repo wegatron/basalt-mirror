@@ -271,8 +271,11 @@ int main(int argc, char** argv) {
 
   const int64_t start_t_ns = vio_dataset->get_image_timestamps().front();
   {
+    // KeypointVioEstimator or KeypointVoEstimator
     vio = basalt::VioEstimatorFactory::getVioEstimator(
         vio_config, calib, basalt::constants::g, use_imu);
+
+    // 初始化, 开启process线程
     vio->initialize(Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero());
 
     opt_flow_ptr->output_queue = &vio->vision_data_queue;

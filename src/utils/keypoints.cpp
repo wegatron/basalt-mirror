@@ -162,6 +162,7 @@ void detectKeypoints(
   kd.corner_angles.clear();
   kd.corner_descriptors.clear();
 
+  // margin by mod
   const size_t x_start = (img_raw.w % PATCH_SIZE) / 2;
   const size_t x_stop = x_start + img_raw.w - PATCH_SIZE;
 
@@ -171,7 +172,7 @@ void detectKeypoints(
   // std::cerr << "x_start " << x_start << " x_stop " << x_stop << std::endl;
   // std::cerr << "y_start " << y_start << " y_stop " << y_stop << std::endl;
 
-  Eigen::MatrixXi cells;
+  Eigen::MatrixXi cells; // used to record how many keypoints in cell
   cells.setZero(img_raw.h / PATCH_SIZE + 1, img_raw.w / PATCH_SIZE + 1);
 
   for (const Eigen::Vector2d& p : current_points) {

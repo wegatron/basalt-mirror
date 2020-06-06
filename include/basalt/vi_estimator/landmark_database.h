@@ -42,7 +42,7 @@ namespace basalt {
 struct KeypointPosition {
   TimeCamId kf_id;
   Eigen::Vector2d dir;
-  double id;
+  double id; //!< inverse depth
 
   inline void backup() {
     backup_dir = dir;
@@ -68,6 +68,9 @@ struct KeypointObservation {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
+/**
+ * @brief LandmarkDatabase, 路标点数据库, 提供路标点的增删和查询操作
+ */
 class LandmarkDatabase {
  public:
   // Non-const
@@ -120,8 +123,9 @@ class LandmarkDatabase {
  private:
   Eigen::aligned_unordered_map<int, KeypointPosition> kpts;
   Eigen::aligned_map<
-      TimeCamId,
-      Eigen::aligned_map<TimeCamId, Eigen::aligned_vector<KeypointObservation>>>
+      TimeCamId, // keyframe id
+      Eigen::aligned_map<TimeCamId, // target frame id
+                         Eigen::aligned_vector<KeypointObservation>>>
       obs;
 
   std::unordered_map<TimeCamId, std::set<int>> host_to_kpts;

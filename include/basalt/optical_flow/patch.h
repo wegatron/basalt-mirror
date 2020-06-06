@@ -61,7 +61,7 @@ struct OpticalFlowPatch {
   typedef Eigen::Matrix<Scalar, PATTERN_SIZE, 4> MatrixP4;
   typedef Eigen::Matrix<int, 2, PATTERN_SIZE> Matrix2Pi;
 
-  static const Matrix2P pattern2;
+  static const Matrix2P pattern2; //!< pixel position(u,v) in pattern
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

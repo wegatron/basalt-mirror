@@ -40,8 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace basalt {
 
+/**
+ * @brief BundleAdjustmentBase 视觉边缘化, Hessian和b的组装构造实现.
+ */
 class BundleAdjustmentBase {
  public:
+  /**
+   * @brief The RelLinDataBase struct 相对位姿对绝对位姿的导数
+   */
   struct RelLinDataBase {
     std::vector<std::pair<TimeCamId, TimeCamId>> order;
 
@@ -49,12 +55,15 @@ class BundleAdjustmentBase {
     Eigen::aligned_vector<Sophus::Matrix6d> d_rel_d_t;
   };
 
+  /**
+   * @brief The FrameRelLinData struct 相对位姿pose hessian矩阵块
+   */
   struct FrameRelLinData {
-    Sophus::Matrix6d Hpp;
-    Sophus::Vector6d bp;
+    Sophus::Matrix6d Hpp; //!< hessian pose pose
+    Sophus::Vector6d bp; //!< b
 
     std::vector<int> lm_id;
-    Eigen::aligned_vector<Eigen::Matrix<double, 6, 3>> Hpl;
+    Eigen::aligned_vector<Eigen::Matrix<double, 6, 3>> Hpl;//!< hessian pose landmark
 
     FrameRelLinData() {
       Hpp.setZero();
@@ -64,6 +73,9 @@ class BundleAdjustmentBase {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 
+  /**
+   * @brief The RelLinData struct 相对位姿landmark hessian矩阵块
+   */
   struct RelLinData : public RelLinDataBase {
     RelLinData(size_t num_keypoints, size_t num_rel_poses) {
       Hll.reserve(num_keypoints);
@@ -98,11 +110,20 @@ class BundleAdjustmentBase {
     double error;
   };
 
+  /**
+   * @brief computeError 计算视觉残差
+   */
   void computeError(double& error,
                     std::map<int, std::vector<std::pair<TimeCamId, double>>>*
                         outliers = nullptr,
                     double outlier_threshold = 0) const;
 
+  /**
+   * @brief 计算线性化点, 相对位姿-landmark hessian矩阵块和b
+   * @param rld_vec relative pose and landmark hessian block
+   * @param obs_to_lin  observation of host frames
+   * @param error
+   */
   void linearizeHelper(
       Eigen::aligned_vector<RelLinData>& rld_vec,
       const Eigen::aligned_map<
@@ -112,6 +133,9 @@ class BundleAdjustmentBase {
           obs_to_lin,
       double& error) const;
 
+  /**
+   * @brief 计算线性化点, 相对位姿-相对位姿 hessian矩阵块和b
+   */
   static void linearizeRel(const RelLinData& rld, Eigen::MatrixXd& H,
                            Eigen::VectorXd& b);
 
@@ -233,7 +257,10 @@ class BundleAdjustmentBase {
   void get_current_points(Eigen::aligned_vector<Eigen::Vector3d>& points,
                           std::vector<int>& ids) const;
 
-  // Modifies abs_H and abs_b as a side effect.
+
+  /**
+   * @brief marginalizeHelper执行边缘化. Modifies abs_H and abs_b as a side effect.
+   */
   static void marginalizeHelper(Eigen::MatrixXd& abs_H, Eigen::VectorXd& abs_b,
                                 const std::set<int>& idx_to_keep,
                                 const std::set<int>& idx_to_marg,
@@ -243,17 +270,27 @@ class BundleAdjustmentBase {
   void computeDelta(const AbsOrderMap& marg_order,
                     Eigen::VectorXd& delta) const;
 
+  /**
+   * @brief linearizeMargPrior 将相对位姿的hessian和b转化为绝对位姿的hessian和b
+   */
   void linearizeMargPrior(const AbsOrderMap& marg_order,
                           const Eigen::MatrixXd& marg_H,
                           const Eigen::VectorXd& marg_b, const AbsOrderMap& aom,
                           Eigen::MatrixXd& abs_H, Eigen::VectorXd& abs_b,
                           double& marg_prior_error) const;
 
+
+  /**
+   * @brief BundleAdjustmentBase::computeMargPriorError 计算先验误差
+   */
   void computeMargPriorError(const AbsOrderMap& marg_order,
                              const Eigen::MatrixXd& marg_H,
                              const Eigen::VectorXd& marg_b,
                              double& marg_prior_error) const;
 
+  /**
+   * @brief checkNullspace 检测0空间
+   */
   static Eigen::VectorXd checkNullspace(
       const Eigen::MatrixXd& marg_H, const Eigen::VectorXd& marg_b,
       const AbsOrderMap& marg_order,
